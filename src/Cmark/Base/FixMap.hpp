@@ -97,7 +97,7 @@ namespace CM
 
         void clear()
         {
-            while (m_IndexCodeQueue.empty())
+            while (!m_IndexCodeQueue.empty())
             {
                 m_IndexCodeQueue.pop();
             }

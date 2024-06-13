@@ -18,7 +18,7 @@ namespace CM
         static QStatusBar * statusBar();
 
     private:
-        static QStatusBar * m_statusBar;
+        static QStatusBar * m_StatusBar;
         static void check();
     };
 

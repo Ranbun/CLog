@@ -3,10 +3,7 @@
 #include "MainWindow.h"
 
 #include <future>
-#include <QFileDialog>
-#include <QMenuBar>
-#include <QPainter>
-#include <QToolBar>
+
 #include <File/BatchImageProcess.h>
 #include <File/ResourcesTool.h>
 #include <Log/CLog.h>
@@ -16,6 +13,11 @@
 #include "ImagePropertyDockWidget.h"
 #include "StatusBar.h"
 
+#include <QFileDialog>
+#include <QMenuBar>
+#include <QPainter>
+#include <QToolBar>
+#include <QObject>
 
 namespace CM
 {
@@ -93,6 +95,18 @@ namespace CM
             batchImageProcessor.Run();
         });
 
+        connect(m_OpenFile,&QAction::triggered,[this]()
+        {
+            QString file = QFileDialog::getOpenFileName(this);
+            QFileInfo fileIns(file);
+            if(!fileIns.exists())
+            {
+                return ;
+            }
+            CLogInstance.PrintMes<QString>(file);
+            emit m_DisplayWidget->sigPreViewImage(file.toStdString());
+        });
+
         connect(this, &MainWindow::sigBatchProcessImagesRootPath, m_LeftDockWidget.get(), [this]()-> QString
         {
             return m_LeftDockWidget->rootImagePath();
@@ -117,10 +131,10 @@ namespace CM
         const auto status = statusBar(); ///< 使用内置方法创建 status bar
         CM::StatusBar::Init(status);
 
-        const auto MenuBar = menuBar();
+        const auto currentMenuBar = menuBar();
 
         const auto file = new QMenu("File(&F)");
-        MenuBar->addMenu(file);
+        currentMenuBar->addMenu(file);
 
         m_NewAction = new QAction("New");
         m_NewAction->setIcon(QIcon("./sources/icons/new.png"));
@@ -128,10 +142,15 @@ namespace CM
         m_NewAction->setShortcut({"Ctrl+N"});
         file->addAction(m_NewAction);
 
-        m_OpenDirectoryAction = new QAction("Open");
+        m_OpenFile = new QAction("preview File");
+        file->addAction(m_OpenFile);
+        m_OpenFile->setIcon(QIcon("./sources/icons/openFile.png"));
+
+        m_OpenDirectoryAction = new QAction("Open Directory");
+        m_OpenDirectoryAction = new QAction("Open Directory");
         m_OpenDirectoryAction->setToolTip(tr("Open Directory"));
         m_OpenDirectoryAction->setShortcut({"Ctrl+P"});
-        m_OpenDirectoryAction->setIcon(QIcon("./sources/icons/open.png"));
+        m_OpenDirectoryAction->setIcon(QIcon("./sources/icons/openDirectory.png"));
         file->addAction(m_OpenDirectoryAction);
 
         m_BatchProcessImage = new QAction("Process All");
@@ -141,7 +160,7 @@ namespace CM
         file->addAction(m_BatchProcessImage);
 
         const auto Edit = new QMenu("Edit(&E)");
-        MenuBar->addMenu(Edit);
+        // MenuBar->addMenu(Edit);
         m_EditPreviewSceneLayoutAction = new QAction("Layout Setting");
         m_EditPreviewSceneLayoutAction->setToolTip(tr("Preview Scene Layout Setting"));
         m_EditPreviewSceneLayoutAction->setShortcut({"Ctrl+E"});
@@ -157,11 +176,17 @@ namespace CM
         toolBar->setMovable(false);
         toolBar->setIconSize({16, 16});
 
+        toolBar->addAction(m_OpenFile);
+        toolBar->addAction(m_OpenDirectoryAction);
+
+        /// 添加分割线
+        toolBar->addSeparator();
+
         /// save preview image
         {
             const auto savePreviewImageAction = toolBar->addAction("Save preview");
             savePreviewImageAction->setToolTip("Save preview Image");
-            QPixmap previewSceneSaveIcon("./sources/icons/previewSceneSave.png");
+            QPixmap previewSceneSaveIcon("./sources/icons/save.png");
             previewSceneSaveIcon = previewSceneSaveIcon.scaled({16, 16}, Qt::KeepAspectRatio);
             savePreviewImageAction->setIcon(previewSceneSaveIcon);
 
@@ -172,17 +197,19 @@ namespace CM
         }
 
         /// save it
+#if  0
         {
             const auto save = toolBar->addAction("Add Logo Save");
             save->setToolTip("Save as Image with logo");
             QPixmap previewSceneSaveIcon("./sources/icons/save.png");
             previewSceneSaveIcon = previewSceneSaveIcon.scaled({16, 16}, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             save->setIcon(previewSceneSaveIcon);
-            save->setVisible(false);
+            save->setVisible(true);
             connect(save, &QAction::triggered, [this]()
             {
                 m_DisplayWidget->saveScene(SceneIndex::GenerateLogoScene);
             });
         }
+#endif
     }
 } // CM

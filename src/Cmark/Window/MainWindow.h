@@ -2,7 +2,7 @@
 #define CAMERAMARK_MAINWINDOW_H
 
 #include <QMainWindow>
-#include "CThread/ThreadPool.h"
+#include <CThread/ThreadPool.h>
 
 namespace CM
 {
@@ -37,15 +37,12 @@ namespace CM
         QAction* m_NewAction{nullptr};
         QAction* m_OpenDirectoryAction{nullptr};   ///< 打开文件夹
         QAction* m_BatchProcessImage{nullptr};
+        QAction* m_OpenFile{nullptr};
 
-        /// Edit
+        /// Edit Actions
         QAction * m_EditPreviewSceneLayoutAction{nullptr};
 
     signals:
-        /**
-         * @brief
-         * @return
-         */
         QString sigBatchProcessImagesRootPath();
         void sigWarning(QString info);
 

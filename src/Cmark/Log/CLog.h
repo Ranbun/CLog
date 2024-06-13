@@ -11,15 +11,13 @@ namespace CM
         static void Init();
 
         template<typename T>
-        void PrintMes(const T & value)
+        static void PrintMes(const T & value)
         {
-            assert(this);
-
             if(auto typeName = QMetaType::typeName(qMetaTypeId<T>()))
             {
 #if _DEBUG
                 qDebug() << value;
-#endif 
+#endif
 
             }
         }
@@ -30,7 +28,7 @@ namespace CM
             {
 #if _DEBUG
                 qInfo() << value;
-#endif 
+#endif
 
             }
         }
@@ -42,7 +40,7 @@ namespace CM
             {
 #if _DEBUG
                 qWarning() << value;
-#endif 
+#endif
             }
         }
 
@@ -58,7 +56,7 @@ namespace CM
 
 #if _DEBUG
             qFatal("%s",value.c_str());
-#endif 
+#endif
         }
 
     private:
