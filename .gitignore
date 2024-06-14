@@ -42,11 +42,13 @@ src/Cmark/sources/pictures/
 
 # Reshaper
 Folder.DotSettings.user
+Folder.DotSettings
+
 
 # Qt build dir
 build-sceneLayout*
+src/vendor/build-batchImageProcessSetting-Desktop_Qt_5_15_2_MinGW_64_bit-Debug
 
 # Cmake user file
 src/vendor/sceneLayout/CMakeLists.txt.user
-src/vendor/build-batchImageProcessSetting-Desktop_Qt_5_15_2_MinGW_64_bit-Debug
 sources/test
