@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "DebugCMark",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/out/build/debug/bin/Cmark",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/out/build/debug/bin",
+            "environment": [{ "name": "config", "value": "Debug" }],
+            "externalConsole": true,
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "/usr/bin/gdb"
+              },
+        },
+        {
+            "name": "ReleaseCMark",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/out/build/release/bin/Cmark",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/out/build/release/bin",
+            "environment": [{ "name": "config", "value": "Release" }],
+            "externalConsole": false,
+            "linux": {
+                "MIMode": "gdb",
+                "miDebuggerPath": "/usr/bin/gdb"
+              },
+        }
+    ]
+}
