@@ -1,6 +1,8 @@
 #ifndef CAMERAMARK_LOGOMANAGER_H
 #define CAMERAMARK_LOGOMANAGER_H
 
+#include <memory>
+
 class QPixmap;
 
 namespace CM

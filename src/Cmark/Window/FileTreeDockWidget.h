@@ -3,6 +3,7 @@
 
 #include <QDockWidget>
 #include <QTextEdit>
+#include <QDir>
 
 class QTreeView;
 class QFileSystemModel;
@@ -23,7 +24,7 @@ namespace CM
         FileTreeDockWidget& operator=(const FileTreeDockWidget&& other) = delete;
 
         void New();
-        void showMessage(const std::string& message);
+        void Open(const QDir &dir);
 
         /**
          * @brief 获取当前FileSystem Model 指向的文件路径

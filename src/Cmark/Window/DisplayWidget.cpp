@@ -8,7 +8,6 @@
 #include <QMessageBox>
 #include <QResizeEvent>
 #include <QVBoxLayout>
-#include <SceneLayoutEditor.h>
 #include <Base/ImagePack.h>
 #include <File/ImageProcess/ImageProcess.h>
 
@@ -37,15 +36,12 @@ namespace CM
 {
     DisplayWidget::DisplayWidget(QWidget* parent)
         : QWidget(parent)
-          , m_PreviewSceneLayoutSettingPanel(std::make_shared<SceneLayoutEditor>())
           , m_PreviewImageScene(new PreViewImageScene)
           , m_AddLogoScene(new LifeSizeImageScene)
           , m_View(new QGraphicsView)
     {
 
         qRegisterMetaType<std::string>("std::string");
-
-        m_PreviewSceneLayoutSettingPanel->setHidden(true);
 
         m_View->setScene(m_PreviewImageScene);
         connect(this, &DisplayWidget::sigCreated, this, [ parent= this, view = m_View ]()
@@ -217,19 +213,6 @@ namespace CM
 
     void DisplayWidget::InitConnect()
     {
-        /// TODO: maybe remove it
-        connect(m_PreviewSceneLayoutSettingPanel.get(), &SceneLayoutEditor::updatedScene, [this]()
-        {
-            const auto scene = dynamic_cast<CScene*>(m_PreviewImageScene);
-            scene->applyLayout(nullptr);
-        });
-
-        connect(this, &DisplayWidget::sigPreViewLayoutSettingsPanel, [this]()
-        {
-            const auto layoutSettings = dynamic_cast<PreViewImageScene*>(m_PreviewImageScene)->layoutSettings();
-            emit m_PreviewSceneLayoutSettingPanel->sigShowLayoutSettingPanel(layoutSettings);
-        });
-
         connect(this, &DisplayWidget::sigOpen, this, [this](const std::string& path)
         {
             open(path);

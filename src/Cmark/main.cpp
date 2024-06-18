@@ -1,5 +1,3 @@
-#include <CMark.h>
-
 #include <QApplication>
 
 #include <File/LogoManager.h>

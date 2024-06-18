@@ -246,8 +246,8 @@ namespace CM
 
     BatchImageProcessor::BatchImageProcessor(QString rootPath)
         : m_Root(std::move(rootPath))
-          , m_AvailableFileType({"jpeg", "jpg"})
-          , m_Pool(new ThreadPool(5))
+        , m_AvailableFileType({"jpeg", "jpg"})
+        , m_Pool(new ThreadPool(5))
 
     {
     }

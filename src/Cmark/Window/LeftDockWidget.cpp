@@ -76,12 +76,13 @@ namespace CM
         m_FileSystemModel = nullptr;
     }
 
-    void FileTreeDockWidget::showMessage(const std::string& message)
+    void FileTreeDockWidget::Open(const QDir &dir)
     {
+        auto path = dir.absolutePath();
         if(!m_FileSystemModel)
         {
             m_FileSystemModel = new QFileSystemModel;
-            m_FileSystemModel->setRootPath(message.c_str());
+            m_FileSystemModel->setRootPath(path);
             m_TreeView->setModel(m_FileSystemModel);
 
             QStringList filter;
@@ -89,8 +90,8 @@ namespace CM
             m_FileSystemModel->setNameFilters(filter);
             m_FileSystemModel->setNameFilterDisables(false);
         }
-        m_FileSystemModel->setRootPath(message.c_str());
-        m_TreeView->setRootIndex(m_FileSystemModel->index(message.c_str()));
+        m_FileSystemModel->setRootPath(path);
+        m_TreeView->setRootIndex(m_FileSystemModel->index(path));
     }
 
     QString FileTreeDockWidget::rootImagePath() const

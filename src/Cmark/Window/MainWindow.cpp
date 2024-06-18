@@ -82,19 +82,33 @@ namespace CM
 
         connect(m_OpenDirectoryAction, &QAction::triggered, [this]()
         {
-            const auto directoryPath = QFileDialog::getExistingDirectory(this);
-            const auto path = std::filesystem::path(directoryPath.toStdString());
-            m_LeftDockWidget->showMessage(directoryPath.toStdString());
+            auto workPath = emit sigBatchProcessImagesRootPath();
+            const auto directoryPath = QFileDialog::getExistingDirectory(this,"Select Directory",workPath.isEmpty() ? QString("./"): workPath);
+            if(directoryPath.isEmpty())
+            {
+                CLog::Warning<QString>("Can not found Path!");
+                return ;
+            }
+            QDir dir(directoryPath);
+            m_LeftDockWidget->Open(dir);
             emit m_DisplayWidget->sigOpen(directoryPath.toStdString());
         });
 
         connect(m_BatchProcessImage, &QAction::triggered, this, [this]()
         {
             const QString rootPath = emit sigBatchProcessImagesRootPath();
+            if(rootPath.isEmpty())
+            {
+                CLog::Warning<QString>("Can not found Path!");
+                return ;
+            }
+
+            QDir dir(rootPath);
             BatchImageProcessor batchImageProcessor({rootPath});
             batchImageProcessor.Run();
         });
 
+        /// 打开文件
         connect(m_OpenFile,&QAction::triggered,[this]()
         {
             QString file = QFileDialog::getOpenFileName(this);
@@ -107,11 +121,13 @@ namespace CM
             emit m_DisplayWidget->sigPreViewImage(file.toStdString());
         });
 
+        /// 获取批处理的文件目录
         connect(this, &MainWindow::sigBatchProcessImagesRootPath, m_LeftDockWidget.get(), [this]()-> QString
         {
             return m_LeftDockWidget->rootImagePath();
         });
 
+        /// 预览图片
         connect(m_LeftDockWidget.get(), &FileTreeDockWidget::previewImage, [this](const QString& path)
         {
             const std::filesystem::path imagePath(path.toStdString());
@@ -120,6 +136,7 @@ namespace CM
             emit m_DisplayWidget->sigPreViewImage(path.toStdString());
         });
 
+        /// 警告信息
         connect(this, &MainWindow::sigWarning, this, [](const QString& info)
         {
             CLog::Warning(info);
@@ -142,7 +159,7 @@ namespace CM
         m_NewAction->setShortcut({"Ctrl+N"});
         file->addAction(m_NewAction);
 
-        m_OpenFile = new QAction("preview File");
+        m_OpenFile = new QAction("Preview File");
         file->addAction(m_OpenFile);
         m_OpenFile->setIcon(QIcon("./sources/icons/openFile.png"));
 
@@ -195,21 +212,5 @@ namespace CM
                 m_DisplayWidget->saveScene(SceneIndex::PreviewScene);
             });
         }
-
-        /// save it
-#if  0
-        {
-            const auto save = toolBar->addAction("Add Logo Save");
-            save->setToolTip("Save as Image with logo");
-            QPixmap previewSceneSaveIcon("./sources/icons/save.png");
-            previewSceneSaveIcon = previewSceneSaveIcon.scaled({16, 16}, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            save->setIcon(previewSceneSaveIcon);
-            save->setVisible(true);
-            connect(save, &QAction::triggered, [this]()
-            {
-                m_DisplayWidget->saveScene(SceneIndex::GenerateLogoScene);
-            });
-        }
-#endif
     }
 } // CM

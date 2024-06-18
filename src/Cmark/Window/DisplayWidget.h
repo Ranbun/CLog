@@ -59,8 +59,6 @@ namespace CM
         void resizeEvent(QResizeEvent* event) override;
 
     private:
-        std::shared_ptr<SceneLayoutEditor> m_PreviewSceneLayoutSettingPanel;  ///< 布局编辑面板
-
         QGraphicsScene* m_PreviewImageScene{nullptr}; ///< 预览使用的场景
 
         QGraphicsScene* m_AddLogoScene{nullptr};  ///< 存储源尺寸大小的带logo的图片的场景
