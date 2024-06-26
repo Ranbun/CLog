@@ -19,6 +19,26 @@ namespace CM
     public:
         MainWindow();
 
+    protected:
+
+        /// widget
+        std::shared_ptr<DisplayWidget> m_DisplayWidget{ nullptr };
+        std::shared_ptr<FileTreeDockWidget> m_FileTreeDockWidget{ nullptr };
+        std::shared_ptr<ImagePropertyDockWidget> m_ImagePropertyDockWidget{ nullptr };
+
+        /// File Actions
+        QAction* m_NewAction{ nullptr };
+        QAction* m_OpenDirectoryAction{ nullptr };   ///< 打开文件夹
+        QAction* m_BatchProcessImage{ nullptr };
+        QAction* m_OpenFile{ nullptr };
+
+        /// Edit Actions
+        QAction* m_EditPreviewSceneLayoutAction{ nullptr };
+
+    protected:
+        void resizeEvent(QResizeEvent* event) override;
+
+
     private:
         void InitWindowLayout();
         void InitUi();
@@ -26,21 +46,7 @@ namespace CM
         void InitTool();
         void InitConnect();
 
-    protected:
 
-        /// widget
-        std::shared_ptr<DisplayWidget> m_DisplayWidget{nullptr};
-        std::shared_ptr<FileTreeDockWidget> m_LeftDockWidget{nullptr};
-        std::shared_ptr<ImagePropertyDockWidget> m_RightDockWidget{nullptr};
-
-        /// File Actions
-        QAction* m_NewAction{nullptr};
-        QAction* m_OpenDirectoryAction{nullptr};   ///< 打开文件夹
-        QAction* m_BatchProcessImage{nullptr};
-        QAction* m_OpenFile{nullptr};
-
-        /// Edit Actions
-        QAction * m_EditPreviewSceneLayoutAction{nullptr};
 
     signals:
         QString sigBatchProcessImagesRootPath();

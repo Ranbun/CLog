@@ -1,3 +1,8 @@
+/**
+ * @brief 文件树窗口
+ * @note 显示当前路径下的所有文件(*.PNG)
+ */
+
 #ifndef  CAMERAMARK_FILETREEDOCKWIDGET_H_
 #define  CAMERAMARK_FILETREEDOCKWIDGET_H_
 
@@ -30,7 +35,7 @@ namespace CM
          * @brief 获取当前FileSystem Model 指向的文件路径
          * @return QString
          */
-        QString rootImagePath() const;
+        [[nodiscard]] QString rootImagePath() const;
 
     private:
         QTreeView * m_TreeView;

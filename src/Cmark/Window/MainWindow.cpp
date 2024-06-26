@@ -27,6 +27,11 @@ namespace CM
         InitUi();
     }
 
+    void MainWindow::resizeEvent(QResizeEvent* event)
+    {
+        QMainWindow::resizeEvent(event);
+    }
+
     void MainWindow::InitWindowLayout()
     {
         /// Central Widget
@@ -38,26 +43,26 @@ namespace CM
         m_DisplayWidget->setMinimumSize(640, 480);
         /// left dock widget
         {
-            m_LeftDockWidget = std::shared_ptr<FileTreeDockWidget>(new FileTreeDockWidget("Dock Widget", this),
+            m_FileTreeDockWidget = std::shared_ptr<FileTreeDockWidget>(new FileTreeDockWidget("Dock Widget", this),
                                                                    []([[maybe_unused]] FileTreeDockWidget* w)
                                                                    {
                                                                    });
-            m_LeftDockWidget->setWindowTitle("");
+            m_FileTreeDockWidget->setWindowTitle("");
 
-            addDockWidget(Qt::LeftDockWidgetArea, m_LeftDockWidget.get());
+             addDockWidget(Qt::LeftDockWidgetArea, m_FileTreeDockWidget.get());
         }
 
         /// right dock widget
         {
-            m_RightDockWidget = std::shared_ptr<ImagePropertyDockWidget>(
+            m_ImagePropertyDockWidget = std::shared_ptr<ImagePropertyDockWidget>(
                 new ImagePropertyDockWidget(this), []([[maybe_unused]] ImagePropertyDockWidget* w)
                 {
                 });
-            m_RightDockWidget->setWindowTitle("");
-            m_RightDockWidget->setVisible(false);
-
-            // addDockWidget(Qt::RightDockWidgetArea, m_rightDockWidget.get());
+            m_ImagePropertyDockWidget->setVisible(true);
+            addDockWidget(Qt::LeftDockWidgetArea, m_ImagePropertyDockWidget.get());
         }
+
+        splitDockWidget(m_FileTreeDockWidget.get(), m_ImagePropertyDockWidget.get(), Qt::Vertical);
 
         setContentsMargins(0, 0, 0, 0);
     }
@@ -76,21 +81,21 @@ namespace CM
     {
         connect(m_NewAction, &QAction::triggered, [this]()
         {
-            m_LeftDockWidget->New();
+            m_FileTreeDockWidget->New();
             Tools::ResourcesTools::destroy();
         });
 
         connect(m_OpenDirectoryAction, &QAction::triggered, [this]()
         {
-            auto workPath = emit sigBatchProcessImagesRootPath();
+            const auto workPath = emit sigBatchProcessImagesRootPath();
             const auto directoryPath = QFileDialog::getExistingDirectory(this,"Select Directory",workPath.isEmpty() ? QString("./"): workPath);
             if(directoryPath.isEmpty())
             {
                 CLog::Warning<QString>("Can not found Path!");
                 return ;
             }
-            QDir dir(directoryPath);
-            m_LeftDockWidget->Open(dir);
+            const QDir dir(directoryPath);
+            m_FileTreeDockWidget->Open(dir);
             emit m_DisplayWidget->sigOpen(directoryPath.toStdString());
         });
 
@@ -111,29 +116,33 @@ namespace CM
         /// 打开文件
         connect(m_OpenFile,&QAction::triggered,[this]()
         {
-            QString file = QFileDialog::getOpenFileName(this);
-            QFileInfo fileIns(file);
+            const QString file = QFileDialog::getOpenFileName(this);
+            const QFileInfo fileIns(file);
             if(!fileIns.exists())
             {
                 return ;
             }
             CLogInstance.PrintMes<QString>(file);
             emit m_DisplayWidget->sigPreViewImage(file.toStdString());
+            emit m_ImagePropertyDockWidget->sigShowProperty(file);
         });
 
         /// 获取批处理的文件目录
-        connect(this, &MainWindow::sigBatchProcessImagesRootPath, m_LeftDockWidget.get(), [this]()-> QString
+        connect(this, &MainWindow::sigBatchProcessImagesRootPath, m_FileTreeDockWidget.get(), [this]()-> QString
         {
-            return m_LeftDockWidget->rootImagePath();
+            return m_FileTreeDockWidget->rootImagePath();
         });
 
         /// 预览图片
-        connect(m_LeftDockWidget.get(), &FileTreeDockWidget::previewImage, [this](const QString& path)
+        connect(m_FileTreeDockWidget.get(), &FileTreeDockWidget::previewImage, [this](const QString& path)
         {
             const std::filesystem::path imagePath(path.toStdString());
             StatusBar::showMessage("preview image: " + path);
             StatusBar::repaint();
+
             emit m_DisplayWidget->sigPreViewImage(path.toStdString());
+            emit m_ImagePropertyDockWidget->sigShowProperty(path);
+
         });
 
         /// 警告信息

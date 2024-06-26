@@ -62,7 +62,8 @@ namespace CM
         m_FileSystemModel->setNameFilters(filter);
         m_FileSystemModel->setNameFilterDisables(false);
 
-        m_TreeView->setRootIndex(m_FileSystemModel->index("./"));
+        // m_TreeView->setRootIndex(m_FileSystemModel->index("./"));
+        m_TreeView->setRootIndex(m_FileSystemModel->index("E:\\Github\\Cmark\\src\\Cmark\\sources\\pictures"));
 
     }
 
