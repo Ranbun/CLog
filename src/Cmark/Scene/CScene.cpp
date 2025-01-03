@@ -17,10 +17,10 @@ namespace CM
 #ifdef TOOLWIDGET
     namespace
     {
-        QGraphicsProxyWidget* CreateItem(const QSizeF& minimum = QSizeF(100.0, 100.0),
-                                         const QSizeF& preferred = QSize(150.0, 100.0),
-                                         const QSizeF& maximum = QSizeF(200.0, 100.0),
-                                         const QString& name = "0")
+        QGraphicsProxyWidget *CreateItem(const QSizeF &minimum = QSizeF(100.0, 100.0),
+                                         const QSizeF &preferred = QSize(150.0, 100.0),
+                                         const QSizeF &maximum = QSizeF(200.0, 100.0),
+                                         const QString &name = "0")
         {
             auto w = new QGraphicsProxyWidget;
             w->setContentsMargins(0, 0, 0, 0);
@@ -38,10 +38,8 @@ namespace CM
     }
 #endif
 
-    CScene::CScene(QObject* parent)
-        : QGraphicsScene(parent)
-          , m_LogoItem(new QGraphicsPixmapItem)
-          , m_SceneLayout(std::make_shared<SceneLayoutSettings>())
+    CScene::CScene(QObject *parent)
+        : QGraphicsScene(parent), m_LogoItem(new QGraphicsPixmapItem), m_SceneLayout(std::make_shared<SceneLayoutSettings>())
     {
         m_ShowImageItem = new PreViewImageItem(nullptr, m_SceneLayout);
         Init();
@@ -59,9 +57,8 @@ namespace CM
     void CScene::Init()
     {
         m_PlainTextFont.setFamily("Microsoft YaHei");
-        //m_PlainTextFont.setPointSize(11);
+        // m_PlainTextFont.setPointSize(11);
         m_PlainTextFont.setPixelSize(20);
-
 
         InitMargin();
         InitTargetImageItem();
@@ -70,7 +67,7 @@ namespace CM
         InitSplitRect();
 
         connect(this, &CScene::sigNoScenes, [this](const bool val)
-        {
+                {
             m_SplitRectItem->setVisible(val);
             m_LogoItem->setVisible(val);
             m_Bottom->setVisible(val);
@@ -78,8 +75,7 @@ namespace CM
             for (const auto& [key, it] : m_TextItem)
             {
                 it->setVisible(val);
-            }
-        });
+            } });
 
 #ifdef TOOLWIDGET
         constexpr QSizeF minSize(30, 100);
@@ -88,7 +84,7 @@ namespace CM
 
         auto a = CreateItem(minSize, prefSize, maxSize, "A");
         {
-            auto ap = dynamic_cast<QPushButton*>(a->widget());
+            auto ap = dynamic_cast<QPushButton *>(a->widget());
             ap->setText("Camera Maker");
             ap->setContentsMargins(0.0, 0.0, 0.0, 0.0);
             ap->setStyleSheet("border: none;");
@@ -100,11 +96,10 @@ namespace CM
             ap->setPalette(pa);
         }
 
-
         auto b = CreateItem(minSize, prefSize, maxSize, "B");
 
         {
-            auto bp = dynamic_cast<QPushButton*>(b->widget());
+            auto bp = dynamic_cast<QPushButton *>(b->widget());
             bp->setText("Photo Times");
             bp->setContentsMargins(0.0, 0, 0.0, 0.0);
             bp->setStyleSheet("border: none;");
@@ -117,11 +112,10 @@ namespace CM
         }
 
         auto c = CreateItem(minSize, prefSize, maxSize, "C");
-        dynamic_cast<QPushButton*>(c->widget())->setText("Lens Group");
-
+        dynamic_cast<QPushButton *>(c->widget())->setText("Lens Group");
 
         auto d = CreateItem(minSize, prefSize, maxSize, "D");
-        dynamic_cast<QPushButton*>(d->widget())->setText("Lens Infos");
+        dynamic_cast<QPushButton *>(d->widget())->setText("Lens Infos");
 
         const auto toolWidgetLayout = new QGraphicsAnchorLayout;
         toolWidgetLayout->setSpacing(0);
@@ -133,7 +127,6 @@ namespace CM
 
         b->setMaximumHeight(20);
         b->setMaximumWidth(200);
-
 
         toolWidgetLayout->addAnchor(a, Qt::AnchorTop, toolWidgetLayout, Qt::AnchorTop);
         toolWidgetLayout->addAnchor(a, Qt::AnchorLeft, toolWidgetLayout, Qt::AnchorLeft);
@@ -164,8 +157,7 @@ namespace CM
         m_ShowInfos.emplace_back(ShowExifInfo{ShowExifTexPositionIndex::RightTop, {ExifKey::LensModel}});
         m_ShowInfos.emplace_back(ShowExifInfo{
             ShowExifTexPositionIndex::RightBottom,
-            {ExifKey::FocalLength, ExifKey::FStop, ExifKey::ExposureTime, ExifKey::ISOSpeed}
-        });
+            {ExifKey::FocalLength, ExifKey::FStop, ExifKey::ExposureTime, ExifKey::ISOSpeed}});
 
         m_TextItem.insert({ShowExifTexPositionIndex::LeftTop, addText("")});
         m_TextItem.insert({ShowExifTexPositionIndex::LeftBottom, addText("")});
@@ -177,7 +169,7 @@ namespace CM
         font.setPointSize(11);
         font.setPixelSize(13);
 
-        for (auto& [key,item] : m_TextItem)
+        for (auto &[key, item] : m_TextItem)
         {
             switch (key)
             {
@@ -195,26 +187,24 @@ namespace CM
         }
     }
 
-    void CScene::resetTexItemsPlainText(const ExifInfoMap& exifInfoMap)
+    void CScene::resetTexItemsPlainText(const ExifInfoMap &exifInfoMap)
     {
         m_TargetImageExifInfoLists = exifInfoMap; ///< copy infos
 
-        for (const auto& [layoutIndex, keys] : m_ShowInfos)
+        for (const auto &[layoutIndex, keys] : m_ShowInfos)
         {
             const auto item = m_TextItem.at(layoutIndex);
             std::vector<std::string> exifInfos;
-            std::for_each(keys.begin(), keys.end(), [&](const ExifKey& key)
-            {
-                exifInfos.emplace_back(m_TargetImageExifInfoLists[key]);
-            });
+            std::for_each(keys.begin(), keys.end(), [&](const ExifKey &key)
+                          { exifInfos.emplace_back(m_TargetImageExifInfoLists[key]); });
 
             auto res = std::accumulate(exifInfos.begin(), exifInfos.end(), std::string(),
-                                       [](const std::string& a, const std::string& b)
+                                       [](const std::string &a, const std::string &b)
                                        {
-                                            if (a.empty() && b.empty())
-                                            {
-                                                return std::string();
-                                            }
+                                           if (a.empty() && b.empty())
+                                           {
+                                               return std::string();
+                                           }
                                            const auto tail = b.empty() ? std::string() : std::string(" ") + b;
                                            return a + tail;
                                        });
@@ -226,10 +216,11 @@ namespace CM
         const auto rightTopTextRect = m_TextItem.at(ShowExifTexPositionIndex::RightTop)->boundingRect();
         const auto rightBottomTextRect = m_TextItem.at(ShowExifTexPositionIndex::RightBottom)->boundingRect();
         auto maxW = rightTopTextRect.width() > rightBottomTextRect.width()
-                              ? rightTopTextRect.width()
-                              : rightBottomTextRect.width();
+                        ? rightTopTextRect.width()
+                        : rightBottomTextRect.width();
 
-        if (maxW < 200) maxW = 200;
+        if (maxW < 200)
+            maxW = 200;
         m_SceneLayout->setRightMaxWidth(static_cast<int>(maxW));
 
         updateTexItemsPosition();
@@ -237,12 +228,12 @@ namespace CM
 
     void CScene::updateTexItemsPosition()
     {
-        auto& [left,right,top,bottom] = m_SceneLayout->getMargin();
+        auto &[left, right, top, bottom] = m_SceneLayout->getMargin();
         const auto logoWithImageSpacing = m_SceneLayout->logoWithImageSpace();
-        const auto& logoSize = m_SceneLayout->logoSize();
-        const auto& imageSize = m_SceneLayout->imageSize();
+        const auto &logoSize = m_SceneLayout->logoSize();
+        const auto &imageSize = m_SceneLayout->imageSize();
 
-        auto alignment = [](QGraphicsTextItem * item,Qt::AlignmentFlag f)
+        auto alignment = [](QGraphicsTextItem *item, Qt::AlignmentFlag f)
         {
             // QTextBlockFormat format;
             // format.setAlignment(f);
@@ -251,52 +242,46 @@ namespace CM
             // cursor.mergeBlockFormat(format);
             // cursor.clearSelection();
             // item->setTextCursor(cursor);
-
         };
 
-
-        for (const auto& [layoutIndex, keys] : m_ShowInfos)
+        for (const auto &[layoutIndex, keys] : m_ShowInfos)
         {
             const auto item = m_TextItem.at(layoutIndex);
-            const auto& itemRect = item->boundingRect().toRect();
+            const auto &itemRect = item->boundingRect().toRect();
 
             switch (layoutIndex)
             {
             case ShowExifTexPositionIndex::LeftTop:
-                {
-                    QPoint position(m_SceneLayout->leftTextOffset(), top + imageSize.h + logoWithImageSpacing);
-                    item->setPos(position);
-                    alignment(item, Qt::AlignLeft);
-                }
-                break;
+            {
+                QPoint position(m_SceneLayout->leftTextOffset(), top + imageSize.h + logoWithImageSpacing);
+                item->setPos(position);
+                alignment(item, Qt::AlignLeft);
+            }
+            break;
             case ShowExifTexPositionIndex::LeftBottom:
-                {
-                    QPoint position(m_SceneLayout->leftTextOffset(),
-                                    top + logoWithImageSpacing + imageSize.h + logoSize.h - itemRect.height());
-                    item->setPos(position);
-                    alignment(item, Qt::AlignLeft);
-
-                }
-                break;
+            {
+                QPoint position(m_SceneLayout->leftTextOffset(),
+                                top + logoWithImageSpacing + imageSize.h + logoSize.h - itemRect.height());
+                item->setPos(position);
+                alignment(item, Qt::AlignLeft);
+            }
+            break;
             case ShowExifTexPositionIndex::RightTop:
-                {
-                    QPoint position(
-                        left + imageSize.w + right - m_SceneLayout->rightTextMaxWidth() - m_SceneLayout->
-                        rightTextOffset(), top + imageSize.h + logoWithImageSpacing);
-                    item->setPos(position);
-                    alignment(item, Qt::AlignRight);
-
-                }
-                break;
+            {
+                QPoint position(
+                    left + imageSize.w + right - m_SceneLayout->rightTextMaxWidth() - m_SceneLayout->rightTextOffset(), top + imageSize.h + logoWithImageSpacing);
+                item->setPos(position);
+                alignment(item, Qt::AlignRight);
+            }
+            break;
             case ShowExifTexPositionIndex::RightBottom:
-                {
-                    QPoint position(
-                        left + imageSize.w + right - m_SceneLayout->rightTextMaxWidth() - m_SceneLayout->
-                        rightTextOffset(), top + logoWithImageSpacing + imageSize.h + logoSize.h - itemRect.height());
-                    item->setPos(position);
-                    alignment(item, Qt::AlignRight);
-                }
-                break;
+            {
+                QPoint position(
+                    left + imageSize.w + right - m_SceneLayout->rightTextMaxWidth() - m_SceneLayout->rightTextOffset(), top + logoWithImageSpacing + imageSize.h + logoSize.h - itemRect.height());
+                item->setPos(position);
+                alignment(item, Qt::AlignRight);
+            }
+            break;
             }
         }
     }
@@ -309,9 +294,9 @@ namespace CM
         addItem(m_LogoItem);
     }
 
-    void CScene::resetLogoPixmap(const std::shared_ptr<QPixmap>& logo, CameraIndex cameraIndex)
+    void CScene::resetLogoPixmap(const std::shared_ptr<QPixmap> &logo, CameraIndex cameraIndex)
     {
-        const auto& [logoW, logoH] = m_SceneLayout->logoSize();
+        const auto &[logoW, logoH] = m_SceneLayout->logoSize();
 
         const auto h = static_cast<float>(logoH);
         const auto ratio = static_cast<float>(logo->height()) / static_cast<float>(logo->width());
@@ -329,10 +314,10 @@ namespace CM
     {
         const auto logoSpaceWithImage = m_SceneLayout->logoWithImageSpace();
         const auto [imageW, imageH] = m_SceneLayout->imageSize();
-        const auto& [l,r,t,b] = m_SceneLayout->getMargin();
+        const auto &[l, r, t, b] = m_SceneLayout->getMargin();
 
         const auto x = l + r + imageW - m_SceneLayout->logoWithSplitLineSpace() * 2.0 - m_SceneLayout->logoSize().w -
-            m_SceneLayout->rightTextMaxWidth() - m_SceneLayout->rightTextOffset() - m_SceneLayout->splitRectWidth();
+                       m_SceneLayout->rightTextMaxWidth() - m_SceneLayout->rightTextOffset() - m_SceneLayout->splitRectWidth();
         const auto y = t + imageH + logoSpaceWithImage;
         m_LogoItem->setPos(x, y);
     }
@@ -343,14 +328,13 @@ namespace CM
         pixmap.fill(Qt::transparent);
         m_ShowImageItem->setPixmap(pixmap);
         addItem(m_ShowImageItem);
-
     }
 
-    void CScene::resetPreviewImageTarget(const QPixmap& pixmap, size_t imageIndexCode)
+    void CScene::resetPreviewImageTarget(const QPixmap &pixmap, size_t imageIndexCode)
     {
         m_SceneLayout->setImageSize({pixmap.width(), pixmap.height()});
         m_ShowImageItem->resetPixmap(imageIndexCode);
-        m_ShowImageItem->setData(static_cast<int>(GraphicsItemDataIndex::PixmapIndex), QVariant(imageIndexCode));
+        m_ShowImageItem->setData(static_cast<int>(GraphicsItemDataIndex::PixmapIndex), QVariant::fromValue(static_cast<qulonglong>(imageIndexCode)));
 
         m_ShowItemFlags = m_ShowImageItem->validImage();
     }
@@ -358,14 +342,14 @@ namespace CM
     void CScene::InitMargin()
     {
         const auto rect = sceneRect().toRect();
-        const auto& [left,right,top,bottom] = m_SceneLayout->getMargin();
+        const auto &[left, right, top, bottom] = m_SceneLayout->getMargin();
 
         m_Left = new QGraphicsRectItem(0, 0, left, rect.width());
         m_Right = new QGraphicsRectItem(0, 0, right, rect.height());
         m_Top = new QGraphicsRectItem(0, 0, rect.width(), top);
         m_Bottom = new QGraphicsRectItem(0, 0, m_SceneLayout->getMargin().m_Left, rect.width());
 
-        const auto& rectPen = QPen(Qt::transparent);
+        const auto &rectPen = QPen(Qt::transparent);
         m_Left->setPen(rectPen);
         m_Right->setPen(rectPen);
         m_Top->setPen(rectPen);
@@ -379,10 +363,10 @@ namespace CM
 
     void CScene::updateMarginItems()
     {
-        const auto& [left,right,top,bottom] = m_SceneLayout->getMargin();
+        const auto &[left, right, top, bottom] = m_SceneLayout->getMargin();
         const auto logoSpaceWithShowImage = m_SceneLayout->logoWithImageSpace();
-        const auto& imageRect = m_SceneLayout->imageSize();
-        const auto& logoRect = m_SceneLayout->logoSize();
+        const auto &imageRect = m_SceneLayout->imageSize();
+        const auto &logoRect = m_SceneLayout->logoSize();
 
         const auto sceneBoundMarginRectH = top + imageRect.h + logoSpaceWithShowImage + logoRect.h + bottom;
         const auto sceneBoundMarginRectW = left + imageRect.w + right;
@@ -429,16 +413,16 @@ namespace CM
 
     void CScene::updateSplitRect()
     {
-        const auto& logoSize = m_SceneLayout->logoSize();
+        const auto &logoSize = m_SceneLayout->logoSize();
         const auto imageH = m_SceneLayout->imageSize().h;
         const auto imageW = m_SceneLayout->imageSize().w;
         const auto spacing = m_SceneLayout->logoWithImageSpace();
-        const auto& [left,right,top,bottom] = m_SceneLayout->getMargin();
+        const auto &[left, right, top, bottom] = m_SceneLayout->getMargin();
 
         const auto splitRectW = m_SceneLayout->splitRectWidth();
 
         const auto x = left + right + imageW - m_SceneLayout->rightTextOffset() - m_SceneLayout->rightTextMaxWidth() -
-            m_SceneLayout->logoWithSplitLineSpace() - splitRectW;
+                       m_SceneLayout->logoWithSplitLineSpace() - splitRectW;
         const auto y = top + imageH + spacing;
 
         m_SplitRectItem->setRect(x, y, splitRectW, logoSize.h);
@@ -458,7 +442,7 @@ namespace CM
         m_SplitRectItem->setVisible(m_LogoItem->isVisible());
     }
 
-    void CScene::applyLayout(const std::shared_ptr<SceneLayoutSettings>& layout)
+    void CScene::applyLayout(const std::shared_ptr<SceneLayoutSettings> &layout)
     {
         if (layout)
         {

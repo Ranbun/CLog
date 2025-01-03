@@ -3,6 +3,7 @@
 #include <Log/CLog.h>
 
 #include <QBuffer>
+#include <QDateTime>
 
 namespace
 {
@@ -14,17 +15,17 @@ namespace
         constexpr std::hash<std::string> nameGenerator;
         const auto nameCode = nameGenerator(outputName.toStdString());
         outputName = outputName + "__" + QString::number(nameCode);
-        return { outputName };
+        return {outputName};
     }
 }
 
 namespace CM
 {
-    std::shared_ptr<QByteArray> ImageProcess::loadFile(const QString& fileName)
+    std::shared_ptr<QByteArray> ImageProcess::loadFile(const QString &fileName)
     {
         QFile file(fileName);
 
-        if(!file.open(QIODevice::ReadOnly))
+        if (!file.open(QIODevice::ReadOnly))
         {
             return std::make_shared<QByteArray>();
         }
@@ -34,7 +35,7 @@ namespace CM
         return data;
     }
 
-    std::shared_ptr<QImage> ImageProcess::toQImage(const std::shared_ptr<QByteArray>& imageData, const QString& format)
+    std::shared_ptr<QImage> ImageProcess::toQImage(const std::shared_ptr<QByteArray> &imageData, const QString &format)
     {
         QBuffer readAsImageBuffer(imageData.get());
         {
@@ -52,16 +53,16 @@ namespace CM
         return im;
     }
 
-    std::shared_ptr<QImage> ImageProcess::loadImage(const QString& fileName)
+    std::shared_ptr<QImage> ImageProcess::loadImage(const QString &fileName)
     {
         const QFileInfo fileInfo(fileName);
 
         const auto format = fileInfo.suffix().toLower();
         const auto data = loadFile(fileInfo.filePath());
-        return toQImage(data,format);
+        return toQImage(data, format);
     }
 
-    void ImageProcess::save(const std::shared_ptr<QPixmap>& pixmap, const QString& fileName)
+    void ImageProcess::save(const std::shared_ptr<QPixmap> &pixmap, const QString &fileName)
     {
         auto name = fileName;
         if (name.isEmpty())
@@ -73,7 +74,7 @@ namespace CM
         buffer.open(QIODevice::WriteOnly);
 
         const QFileInfo fileInfo(name);
-        if(fileInfo.exists())
+        if (fileInfo.exists())
         {
             buffer.close();
             CLogInstance.PrintMes<QString>(name + QString(" exists."));
@@ -95,7 +96,7 @@ namespace CM
         buffer.close();
     }
 
-    void ImageProcess::save(const std::shared_ptr<QImage>& image, const QString& fileName)
+    void ImageProcess::save(const std::shared_ptr<QImage> &image, const QString &fileName)
     {
         auto name = fileName;
         if (name.isEmpty())
@@ -109,7 +110,7 @@ namespace CM
             const QFileInfo fileInfo(name);
             const auto format = fileInfo.suffix().toLower().toStdString();
 
-            if(QImageWriter imageWriter(&file, format.c_str());
+            if (QImageWriter imageWriter(&file, format.c_str());
                 imageWriter.write(*image))
             {
                 CLog::Info(QString("Image saved successfully."));
@@ -123,7 +124,6 @@ namespace CM
     {
         const auto size = QSizeF(pixmap.size());
         return size.width() / size.height(); // NOLINT(clang-diagnostic-implicit-float-conversion)
-
-    }  
+    }
 
 } // CM

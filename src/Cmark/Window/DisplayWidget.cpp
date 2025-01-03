@@ -6,8 +6,10 @@
 #include <QGraphicsView>
 #include <QImage>
 #include <QMessageBox>
+#include <QDateTime>
 #include <QResizeEvent>
 #include <QVBoxLayout>
+#include <QString>
 #include <Base/ImagePack.h>
 #include <File/ImageProcess/ImageProcess.h>
 
@@ -16,7 +18,6 @@
 #include <File/Resolver/EXIFResolver.h>
 #include "Scene/LifeSizeImageScene.h"
 #include <Scene/PreViewImageScene.h>
-
 
 namespace
 {
@@ -28,26 +29,21 @@ namespace
         constexpr std::hash<std::string> nameGenerator;
         const auto nameCode = nameGenerator(outputName.toStdString());
         outputName = outputName + "__" + QString::number(nameCode);
-        return { outputName };
+        return {outputName};
     }
 }
 
 namespace CM
 {
-    DisplayWidget::DisplayWidget(QWidget* parent)
-        : QWidget(parent)
-          , m_PreviewImageScene(new PreViewImageScene)
-          , m_AddLogoScene(new LifeSizeImageScene)
-          , m_View(new QGraphicsView)
+    DisplayWidget::DisplayWidget(QWidget *parent)
+        : QWidget(parent), m_PreviewImageScene(new PreViewImageScene), m_AddLogoScene(new LifeSizeImageScene), m_View(new QGraphicsView)
     {
 
         qRegisterMetaType<std::string>("std::string");
 
         m_View->setScene(m_PreviewImageScene);
-        connect(this, &DisplayWidget::sigCreated, this, [ parent= this, view = m_View ]()
-        {
-            view->setParent(parent);
-        });
+        connect(this, &DisplayWidget::sigCreated, this, [parent = this, view = m_View]()
+                { view->setParent(parent); });
 
         m_View->setHorizontalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
         m_View->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOff);
@@ -61,37 +57,37 @@ namespace CM
         InitConnect();
     }
 
-    void DisplayWidget::open(const std::string& path) const
+    void DisplayWidget::open(const std::string &path) const
     {
         assert(this);
         /// TODO:: maybe we need do something!
     }
 
-    void DisplayWidget::preViewImage(const std::string& path)
+    void DisplayWidget::preViewImage(const std::string &path)
     {
 
         using PictureManagerInterFace = CM::PictureManager;
         const auto fileIndexCode = ImageProcess::generateFileIndexCode(path);
 
         /// 如果图片被加载出来
-        if(PictureManagerInterFace::getImage(fileIndexCode) != nullptr)
+        if (PictureManagerInterFace::getImage(fileIndexCode) != nullptr)
         {
             emit sigShowImage(fileIndexCode);
         }
 
         {
             /// load file as QByteArray
-            auto [w,h] = SceneLayoutSettings::fixPreViewImageSize();
+            auto [w, h] = SceneLayoutSettings::fixPreViewImageSize();
             auto data = ImageProcess::loadFile(QString::fromStdString(path));
-            const ImagePack loadImagePack{ fileIndexCode,data,path,std::make_shared<std::mutex>(),{w,h}};
+            const ImagePack loadImagePack{fileIndexCode, data, path, std::make_shared<std::mutex>(), {w, h}};
 
             /// load image
 
-            PictureManagerInterFace::loadImage(loadImagePack,true);
+            PictureManagerInterFace::loadImage(loadImagePack, true);
             EXIFResolver::resolver(loadImagePack, false);
 
-            const auto loadF = std::async(std::launch::async, PictureManagerInterFace::loadImage,std::ref(loadImagePack),true);
-            const auto resolverF = std::async(std::launch::async, EXIFResolver::resolver, std::ref(loadImagePack),true);
+            const auto loadF = std::async(std::launch::async, PictureManagerInterFace::loadImage, std::ref(loadImagePack), true);
+            const auto resolverF = std::async(std::launch::async, EXIFResolver::resolver, std::ref(loadImagePack), true);
 
             ///  等待异步任务完成
             loadF.wait();
@@ -102,12 +98,12 @@ namespace CM
         }
 
         /// 加载logo
-        const auto cameraIndex = LogoManager::resolverCameraIndex(EXIFResolver::ExifItem(fileIndexCode,ExifKey::CameraMake));
+        const auto cameraIndex = LogoManager::resolverCameraIndex(EXIFResolver::ExifItem(fileIndexCode, ExifKey::CameraMake));
         LogoManager::loadCameraLogo(cameraIndex);
 
         emit sigShowImage(fileIndexCode);
 
-#if  0
+#if 0
         /// 设置单张图片存储的显示资源
         {
             const auto logoScene = dynamic_cast<LifeSizeImageScene*>(m_AddLogoScene);
@@ -119,7 +115,7 @@ namespace CM
 #endif
     }
 
-    void DisplayWidget::resizeEvent(QResizeEvent* event)
+    void DisplayWidget::resizeEvent(QResizeEvent *event)
     {
         const auto windowSize = event->size();
         m_View->resize(windowSize); ///< resize view
@@ -137,14 +133,15 @@ namespace CM
 
     void DisplayWidget::saveScene(const SceneIndex sceneIndex)
     {
-        auto saveAsFile = [](const std::shared_ptr<QImage>& image, const QString& filePath)
+        auto saveAsFile = [](const std::shared_ptr<QImage> &image, const QString &filePath)
         {
             ImageProcess::save(image, filePath);
         };
 
-        auto save = [this,saveAsFile](QGraphicsScene* scene)
+        auto save = [this, saveAsFile](QGraphicsScene *scene)
         {
-            if (!scene) return;
+            if (!scene)
+                return;
 
             scene->clearSelection(); // Selections would also render to the file
 
@@ -159,26 +156,25 @@ namespace CM
             painter.end();
 
             QFileDialog getFileDialog(this, tr("Save File"),
-                                "./" + ImageSaveDefaultName(),
+                                      "./" + ImageSaveDefaultName(),
                                       tr("Images (*.png);;Images (*.xpm);;Images (*.jpg);;All Files (*)"));
             getFileDialog.setOption(QFileDialog::DontUseCustomDirectoryIcons);
 
             auto fileName = ImageSaveDefaultName() + ".png";
 
-
             switch (getFileDialog.exec())
             {
-                case  QFileDialog::Accepted:
+            case QFileDialog::Accepted:
+            {
+                auto suffix = getFileDialog.selectedNameFilter();
+                fileName = getFileDialog.selectedFiles().first();
+                if (!fileName.isEmpty() && !suffix.isEmpty())
                 {
-                    auto suffix = getFileDialog.selectedNameFilter();
-                    fileName = getFileDialog.selectedFiles().first();
-                    if (!fileName.isEmpty() && !suffix.isEmpty())
-                    {
-                        suffix = suffix.split(QRegExp("[()*]"), Qt::SkipEmptyParts).last();
-                        fileName += suffix;
-                    }
+                    suffix = suffix.split(QRegExp("[()*]"), QString::SplitBehavior::SkipEmptyParts).last();
+                    fileName += suffix;
                 }
-                break;
+            }
+            break;
 
             case QFileDialog::Rejected:
             {
@@ -190,7 +186,6 @@ namespace CM
 
             std::thread saveImage(saveAsFile, image, fileName);
             saveImage.detach();
-
         };
 
         switch (sceneIndex)
@@ -198,37 +193,30 @@ namespace CM
         case SceneIndex::None:
             break;
         case PreviewScene:
-            {
-                save(m_PreviewImageScene);
-            }
-            break;
+        {
+            save(m_PreviewImageScene);
+        }
+        break;
         case GenerateLogoScene:
-            {
-                const auto logoScene = dynamic_cast<LifeSizeImageScene*>(m_AddLogoScene);
-                logoScene->saveSceneAsImage(save);
-            }
-            break;
+        {
+            const auto logoScene = dynamic_cast<LifeSizeImageScene *>(m_AddLogoScene);
+            logoScene->saveSceneAsImage(save);
+        }
+        break;
         }
     }
 
     void DisplayWidget::InitConnect()
     {
-        connect(this, &DisplayWidget::sigOpen, this, [this](const std::string& path)
-        {
-            open(path);
-        }, Qt::QueuedConnection);
+        connect(this, &DisplayWidget::sigOpen, this, [this](const std::string &path)
+                { open(path); }, Qt::QueuedConnection);
 
-
-        connect(this, &DisplayWidget::sigPreViewImage, [this](const std::string& filePath)
-        {
-            preViewImage(filePath);
-        });
+        connect(this, &DisplayWidget::sigPreViewImage, [this](const std::string &filePath)
+                { preViewImage(filePath); });
 
         connect(this, &DisplayWidget::sigShowImage, [this](size_t code)
-        {
+                {
             const auto scene = dynamic_cast<PreViewImageScene*>(m_PreviewImageScene);
-            emit scene->sigShowImage(code);
-        });
-
+            emit scene->sigShowImage(code); });
     }
 } // CM

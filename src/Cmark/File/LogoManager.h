@@ -1,6 +1,8 @@
 #ifndef CAMERAMARK_LOGOMANAGER_H
 #define CAMERAMARK_LOGOMANAGER_H
 
+#include <mutex>
+#include <iostream>
 #include <memory>
 
 class QPixmap;
@@ -41,20 +43,20 @@ namespace CM
          * @param cameraMake exif Info
          * @return CameraIndex指示相机的制造商
          */
-        static CameraIndex resolverCameraIndex(const std::string& cameraMake);
+        static CameraIndex resolverCameraIndex(const std::string &cameraMake);
 
         /**
          * @brief load logo
          * @param cameraIndex 加载的logo的相机
          */
-        static void loadCameraLogo(const CameraIndex& cameraIndex);
+        static void loadCameraLogo(const CameraIndex &cameraIndex);
 
         /**
          * @brief 获取camera maker logo
          * @param cameraIndex
          * @return logo with QPixmap
          */
-        static std::shared_ptr<QPixmap> getCameraMakerLogo(const CameraIndex& cameraIndex);
+        static std::shared_ptr<QPixmap> getCameraMakerLogo(const CameraIndex &cameraIndex);
 
     protected:
         /**
@@ -73,4 +75,4 @@ namespace CM
     };
 } // CM
 
-#endif //CAMERAMARK_LOGOMANAGER_H
+#endif // CAMERAMARK_LOGOMANAGER_H

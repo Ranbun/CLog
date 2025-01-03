@@ -2,6 +2,7 @@
 #define CAMERAMARK_CLOG_H
 
 #include <QDebug>
+#include <mutex>
 
 namespace CM
 {
@@ -10,33 +11,31 @@ namespace CM
     public:
         static void Init();
 
-        template<typename T>
-        static void PrintMes(const T & value)
+        template <typename T>
+        static void PrintMes(const T &value)
         {
-            if(auto typeName = QMetaType::typeName(qMetaTypeId<T>()))
+            if (auto typeName = QMetaType::typeName(qMetaTypeId<T>()))
             {
 #if _DEBUG
                 qDebug() << value;
 #endif
-
             }
         }
-        template<typename T>
-        static void Info(const T & value)
+        template <typename T>
+        static void Info(const T &value)
         {
-            if(auto typeName = QMetaType::typeName(qMetaTypeId<T>()))
+            if (auto typeName = QMetaType::typeName(qMetaTypeId<T>()))
             {
 #if _DEBUG
                 qInfo() << value;
 #endif
-
             }
         }
 
-        template<typename T>
-        static void Warning(const T & value)
+        template <typename T>
+        static void Warning(const T &value)
         {
-            if(auto typeName = QMetaType::typeName(qMetaTypeId<T>()))
+            if (auto typeName = QMetaType::typeName(qMetaTypeId<T>()))
             {
 #if _DEBUG
                 qWarning() << value;
@@ -44,30 +43,28 @@ namespace CM
             }
         }
 
-        template<typename T>
-        static void Fatal(const T & value)
+        template <typename T>
+        static void Fatal(const T &value)
         {
             Q_ASSERT(false);
         }
 
-        template<>
-        static void Fatal(const std::string& value)
+        template <>
+        static void Fatal(const std::string &value)
         {
 
 #if _DEBUG
-            qFatal("%s",value.c_str());
+            qFatal("%s", value.c_str());
 #endif
         }
 
     private:
         static std::once_flag m_InitFlag;
-
     };
 
-
     inline CLog g_Log;
-    #define CLogInstance CM::g_Log
+#define CLogInstance CM::g_Log
 
 } // CM
 
-#endif //CAMERAMARK_CLOG_H
+#endif // CAMERAMARK_CLOG_H
